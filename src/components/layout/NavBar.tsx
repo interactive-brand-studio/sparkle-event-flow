@@ -47,8 +47,8 @@ const NavBar = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <Button variant="outline" className="rounded-full">
-              Login / Signup
+            <Button variant="outline" className="rounded-full" asChild>
+              <Link to="/vendor/login">Vendor Portal</Link>
             </Button>
             <Button asChild className="btn-primary">
               <Link to="/plan">Start Planning</Link>
@@ -73,8 +73,8 @@ const NavBar = () => {
             <NavLink to="/vendors" label="Browse Vendors" isMobile />
             <NavLink to="/about" label="About" isMobile />
             <hr className="border-gray-200" />
-            <Button variant="outline" className="w-full justify-center rounded-full">
-              Login / Signup
+            <Button variant="outline" className="w-full justify-center rounded-full" asChild>
+              <Link to="/vendor/login">Vendor Portal</Link>
             </Button>
             <Button asChild className="w-full justify-center btn-primary">
               <Link to="/plan">Start Planning</Link>

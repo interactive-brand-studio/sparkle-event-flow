@@ -20,6 +20,17 @@ import BookingDetails from "./pages/BookingDetails";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
+// Vendor portal routes
+import VendorLogin from "./pages/vendor/VendorLogin";
+import VendorProfileSetup from "./pages/vendor/VendorProfileSetup";
+import VendorDashboard from "./pages/vendor/VendorDashboard";
+import VendorPackages from "./pages/vendor/VendorPackages";
+import VendorBookings from "./pages/vendor/VendorBookings";
+import VendorPromote from "./pages/vendor/VendorPromote";
+
+// Admin portal routes
+import AdminDashboard from "./pages/admin/AdminDashboard";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -45,6 +56,17 @@ const App = () => (
                 <Route path="about" element={<About />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
+              
+              {/* Vendor Portal Routes - using separate layout */}
+              <Route path="/vendor/login" element={<VendorLogin />} />
+              <Route path="/vendor/profile" element={<VendorProfileSetup />} />
+              <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+              <Route path="/vendor/packages" element={<VendorPackages />} />
+              <Route path="/vendor/bookings" element={<VendorBookings />} />
+              <Route path="/vendor/promote" element={<VendorPromote />} />
+              
+              {/* Admin Portal Routes - using separate layout */}
+              <Route path="/admin" element={<AdminDashboard />} />
             </Routes>
           </BrowserRouter>
         </PackageProvider>
