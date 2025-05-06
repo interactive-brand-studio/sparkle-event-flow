@@ -3,6 +3,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CircleDollarSign } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 interface BudgetMeterProps {
   currentAmount: number;
@@ -36,8 +37,10 @@ const BudgetMeter = ({ currentAmount, budgetMax, className = '' }: BudgetMeterPr
       
       <Progress 
         value={percentage} 
-        className={`h-2 ${isOverBudget ? 'bg-red-100' : 'bg-gray-100'}`}
-        indicatorClassName={isOverBudget ? 'bg-red-500' : 'bg-green-500'}
+        className={cn(
+          "h-2",
+          isOverBudget ? "bg-red-100" : "bg-gray-100"
+        )}
       />
       
       <div className="mt-3 text-right text-sm">

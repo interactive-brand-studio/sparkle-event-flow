@@ -7,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { useUserEvent } from '@/context/UserEventContext';
 import { usePackage } from '@/context/PackageContext';
