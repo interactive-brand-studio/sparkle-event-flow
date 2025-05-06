@@ -64,7 +64,7 @@ const AIStep = () => {
           <h3 className="font-semibold mb-2 text-blue-800">Ready to finish your planning profile!</h3>
           <p className="text-gray-700">
             Click "Complete" below to see your personalized vendor packages based on your preferences.
-            {aiConsent ? ' You'll be connected with our AI assistant right away!' : ''}
+            {aiConsent ? " You'll be connected with our AI assistant right away!" : ""}
           </p>
         </div>
       </div>

@@ -167,7 +167,7 @@ const howItWorksSteps = [
   {
     icon: '📝',
     title: 'Fill out your event details',
-    description: 'Tell us what kind of event you're planning, your budget, and preferences.'
+    description: "Tell us what kind of event you're planning, your budget, and preferences."
   },
   {
     icon: '🔍',
@@ -210,7 +210,7 @@ const successStories = [
   {
     name: 'Sara & Michael',
     eventType: 'Wedding - 150 guests',
-    quote: 'Plansparkles helped us find the perfect vendors within our budget. The AI assistant was like having a pro planner at our fingertips!'
+    quote: "Plansparkles helped us find the perfect vendors within our budget. The AI assistant was like having a pro planner at our fingertips!"
   },
   {
     name: 'Corporate Events Team',
@@ -220,15 +220,15 @@ const successStories = [
   {
     name: 'Jessica',
     eventType: 'Birthday Party - 30 guests',
-    quote: 'I was able to plan my daughter's entire birthday in under an hour! The vendors were amazing and the party was perfect.'
+    quote: "I was able to plan my daughter's entire birthday in under an hour! The vendors were amazing and the party was perfect."
   }
 ];
 
 // FAQ data
 const faqs = [
   {
-    question: 'What's included in the vendor packages?',
-    answer: 'Our vendor packages include all essential services needed for your event. Each package clearly outlines what's included, pricing, and any additional options available. You can customize packages to fit your specific needs.'
+    question: "What's included in the vendor packages?",
+    answer: "Our vendor packages include all essential services needed for your event. Each package clearly outlines what's included, pricing, and any additional options available. You can customize packages to fit your specific needs."
   },
   {
     question: 'How do you vet your vendors?',
@@ -240,7 +240,7 @@ const faqs = [
   },
   {
     question: 'Is there a fee to use Plansparkles?',
-    answer: 'Basic planning tools are completely free to use. We offer premium features with upgraded accounts, and some vendor bookings may include a small service fee that's clearly displayed before confirmation.'
+    answer: 'Basic planning tools are completely free to use. We offer premium features with upgraded accounts, and some vendor bookings may include a small service fee that\'s clearly displayed before confirmation.'
   }
 ];
 
