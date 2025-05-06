@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import VendorLayout from '@/components/layout/VendorLayout';
 import BookingItem from '@/components/vendor/BookingItem';
 import { formatCurrency } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Calendar } from 'lucide-react';
 
 // Mock data types
 interface VendorBooking {
