@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Package, Calendar, Settings, User, Star, Edit, Trash } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import BookingCard from '@/components/dashboard/BookingCard';
+import { Input } from '@/components/ui/input';
 
 // Mock data for dashboard
 const MOCK_BOOKINGS = [
@@ -18,7 +19,7 @@ const MOCK_BOOKINGS = [
     location: 'Grand Plaza Hotel',
     guestCount: 120,
     totalPrice: 12500,
-    status: 'confirmed',
+    status: 'confirmed' as 'confirmed' | 'pending' | 'completed',
     vendors: [
       { name: 'Elegant Catering', category: 'Catering' },
       { name: 'Melody DJs', category: 'Music' },
@@ -32,7 +33,7 @@ const MOCK_BOOKINGS = [
     location: 'Business Center',
     guestCount: 75,
     totalPrice: 8200,
-    status: 'pending',
+    status: 'pending' as 'confirmed' | 'pending' | 'completed',
     vendors: [
       { name: 'Business Catering Co.', category: 'Catering' },
       { name: 'Tech AV Solutions', category: 'Equipment' }
