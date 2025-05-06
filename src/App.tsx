@@ -13,6 +13,10 @@ import VendorProfile from "./pages/VendorProfile";
 import PackageBuilder from "./pages/PackageBuilder";
 import Plan from "./pages/Plan";
 import Packages from "./pages/Packages";
+import AIPlanner from "./pages/AIPlanner";
+import BookingCheckout from "./pages/BookingCheckout";
+import UserDashboard from "./pages/UserDashboard";
+import BookingDetails from "./pages/BookingDetails";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
@@ -34,6 +38,10 @@ const App = () => (
                 <Route path="package-builder" element={<PackageBuilder />} />
                 <Route path="plan" element={<Plan />} />
                 <Route path="packages" element={<Packages />} />
+                <Route path="ai-planner" element={<AIPlanner />} />
+                <Route path="checkout" element={<BookingCheckout />} />
+                <Route path="dashboard" element={<UserDashboard />} />
+                <Route path="dashboard/booking/:id" element={<BookingDetails />} />
                 <Route path="about" element={<About />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
