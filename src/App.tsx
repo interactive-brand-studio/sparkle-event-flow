@@ -19,6 +19,9 @@ import UserDashboard from "./pages/UserDashboard";
 import BookingDetails from "./pages/BookingDetails";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Vendor portal routes
 import VendorLogin from "./pages/vendor/VendorLogin";
@@ -42,6 +45,10 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              {/* Auth Routes */}
+              <Route path="/auth/login" element={<Login />} />
+              <Route path="/auth/signup" element={<Signup />} />
+              
               <Route path="/" element={<Layout />}>
                 <Route index element={<Index />} />
                 <Route path="vendors" element={<Vendors />} />
@@ -50,9 +57,21 @@ const App = () => (
                 <Route path="plan" element={<Plan />} />
                 <Route path="packages" element={<Packages />} />
                 <Route path="ai-planner" element={<AIPlanner />} />
-                <Route path="checkout" element={<BookingCheckout />} />
-                <Route path="dashboard" element={<UserDashboard />} />
-                <Route path="dashboard/booking/:id" element={<BookingDetails />} />
+                <Route path="checkout" element={
+                  <ProtectedRoute>
+                    <BookingCheckout />
+                  </ProtectedRoute>
+                } />
+                <Route path="dashboard" element={
+                  <ProtectedRoute>
+                    <UserDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="dashboard/booking/:id" element={
+                  <ProtectedRoute>
+                    <BookingDetails />
+                  </ProtectedRoute>
+                } />
                 <Route path="about" element={<About />} />
                 <Route path="*" element={<NotFound />} />
               </Route>

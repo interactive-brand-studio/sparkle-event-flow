@@ -2,6 +2,9 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import ResultsCarousel from '@/components/landing/ResultsCarousel';
+import AIPromoSection from '@/components/landing/AIPromoSection';
+import PricingSection from '@/components/landing/PricingSection';
 
 const Index = () => {
   return (
@@ -51,6 +54,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* NEW: Results Carousel Section */}
+      <ResultsCarousel />
+
       {/* Why Plansparkles Section */}
       <section className="section-container bg-gray-50">
         <h2 className="section-title">Why Plansparkles?</h2>
@@ -70,40 +76,10 @@ const Index = () => {
       </section>
 
       {/* AI Assistant Promo Section */}
-      <section className="section-container bg-gradient-to-r from-purple-600 to-blue-500 text-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="animate-fade-in-right">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">Need help planning your event?</h2>
-              <p className="text-xl mb-8 text-white/90">
-                Our AI assistant helps you make decisions, suggests ideas, and answers all your planning questions.
-              </p>
-              <div className="relative inline-block">
-                <Button className="bg-white text-purple-600 hover:bg-gray-100 text-lg px-8 py-6 rounded-full font-bold shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  Try Planspark AI
-                </Button>
-                <div className="absolute -top-10 -right-2 bg-yellow-400 text-gray-800 py-1 px-3 rounded-full text-sm font-medium animate-bounce-light">
-                  First 3 uses free!
-                </div>
-              </div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl shadow-xl animate-fade-in">
-              {/* Chat UI Preview */}
-              <div className="flex flex-col space-y-4">
-                <div className="bg-white/90 rounded-tl-xl rounded-tr-xl rounded-br-xl p-4 max-w-[80%] shadow-sm">
-                  <p className="text-gray-800">Hi! I'm planning a birthday party for 20 people. Any suggestions?</p>
-                </div>
-                <div className="bg-purple-100 rounded-tl-xl rounded-tr-xl rounded-bl-xl p-4 max-w-[80%] ml-auto shadow-sm">
-                  <p className="text-gray-800">I'd recommend a cocktail party with a dessert station! Here are some vendor packages that would work for your group size...</p>
-                </div>
-                <div className="bg-white/90 rounded-tl-xl rounded-tr-xl rounded-br-xl p-4 max-w-[80%] shadow-sm">
-                  <p className="text-gray-800">That sounds perfect! Can you help me find a venue?</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <AIPromoSection />
+
+      {/* NEW: Pricing Preview Section */}
+      <PricingSection />
 
       {/* Success Stories */}
       <section className="section-container bg-white">
@@ -158,6 +134,20 @@ const Index = () => {
           </Button>
         </div>
       </section>
+
+      {/* Mobile Sticky CTA */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-4 z-40">
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-700">
+              <p className="font-semibold">Start planning your dream event</p>
+            </div>
+            <Button asChild size="sm" className="btn-primary">
+              <Link to="/plan">Open Wizard</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

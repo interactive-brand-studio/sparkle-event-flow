@@ -1,15 +1,29 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { isUserLoggedIn, logoutUser } from '@/utils/auth';
 
 const NavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Check login status
+    setIsLoggedIn(isUserLoggedIn());
+    
     const handleScroll = () => {
       if (window.scrollY > 10) {
         setIsScrolled(true);
@@ -25,6 +39,12 @@ const NavBar = () => {
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location]);
+
+  const handleLogout = () => {
+    logoutUser();
+    setIsLoggedIn(false);
+    navigate('/');
+  };
 
   return (
     <nav
@@ -47,9 +67,48 @@ const NavBar = () => {
           </div>
           
           <div className="flex items-center space-x-4">
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="rounded-full flex items-center space-x-2">
+                    <User className="h-4 w-4" />
+                    <span>Account</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard">Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard/bookings">My Bookings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard/packages">Saved Packages</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="outline" className="rounded-full" asChild>
+                <Link to="/auth/login">Login</Link>
+              </Button>
+            )}
+            
+            {!isLoggedIn && (
+              <Button variant="outline" className="rounded-full" asChild>
+                <Link to="/auth/signup">Sign Up</Link>
+              </Button>
+            )}
+            
             <Button variant="outline" className="rounded-full" asChild>
               <Link to="/vendor/login">Vendor Portal</Link>
             </Button>
+            
             <Button asChild className="btn-primary">
               <Link to="/plan">Start Planning</Link>
             </Button>
@@ -73,6 +132,27 @@ const NavBar = () => {
             <NavLink to="/vendors" label="Browse Vendors" isMobile />
             <NavLink to="/about" label="About" isMobile />
             <hr className="border-gray-200" />
+            
+            {isLoggedIn ? (
+              <>
+                <NavLink to="/dashboard" label="My Dashboard" isMobile />
+                <NavLink to="/dashboard/bookings" label="My Bookings" isMobile />
+                <NavLink to="/dashboard/packages" label="Saved Packages" isMobile />
+                <Button variant="ghost" className="justify-start text-red-500" onClick={handleLogout}>
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" className="w-full justify-center rounded-full" asChild>
+                  <Link to="/auth/login">Login</Link>
+                </Button>
+                <Button variant="outline" className="w-full justify-center rounded-full" asChild>
+                  <Link to="/auth/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
+            
             <Button variant="outline" className="w-full justify-center rounded-full" asChild>
               <Link to="/vendor/login">Vendor Portal</Link>
             </Button>

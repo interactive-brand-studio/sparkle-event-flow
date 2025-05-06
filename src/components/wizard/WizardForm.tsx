@@ -39,7 +39,7 @@ const WizardForm = () => {
     // Navigate based on AI consent
     if (userEvent.aiConsent) {
       // In a real app, this would navigate to AI chat
-      alert('Navigating to AI assistant (coming soon)');
+      navigate('/ai-planner');
     } else {
       navigate('/packages');
     }
