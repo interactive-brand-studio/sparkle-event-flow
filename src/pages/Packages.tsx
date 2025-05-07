@@ -12,7 +12,7 @@ import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import { VendorType } from '@/context/UserEventContext';
 
 // Mock data based on sample vendors
-import { vendors } from '@/data/mockVendors';
+import { mockVendors as vendors } from '@/data/mockVendors';
 
 interface PackageOption {
   id: string;
@@ -55,7 +55,7 @@ const Packages = () => {
         
         // Filter vendors by preferred types
         const relevantVendors = vendors.filter(vendor => 
-          userEvent.preferredVendors.includes(vendor.type as VendorType)
+          userEvent.preferredVendors.includes(vendor.category as VendorType)
         );
         
         // Generate packages with different price points
@@ -93,7 +93,7 @@ const Packages = () => {
         
         // Helper function to get random vendor of specific type
         const getRandomVendorByType = (type: VendorType, priceRange: 'low' | 'mid' | 'high') => {
-          const typeVendors = relevantVendors.filter(v => v.type === type);
+          const typeVendors = relevantVendors.filter(v => v.category === type);
           if (typeVendors.length === 0) return null;
           
           if (priceRange === 'low') {
@@ -123,7 +123,7 @@ const Packages = () => {
             budgetPackage.vendors.push({
               type: vendorType,
               name: budgetVendor.name,
-              description: budgetVendor.shortDescription,
+              description: budgetVendor.description,
               price: basePrice,
               addOns: []  // No add-ons for budget package
             });
@@ -153,7 +153,7 @@ const Packages = () => {
             balancedPackage.vendors.push({
               type: vendorType,
               name: balancedVendor.name,
-              description: balancedVendor.shortDescription,
+              description: balancedVendor.description,
               price: basePrice + addOnPrice,
               addOns: addOns
             });
@@ -181,7 +181,7 @@ const Packages = () => {
             premiumPackage.vendors.push({
               type: vendorType,
               name: premiumVendor.name,
-              description: premiumVendor.shortDescription,
+              description: premiumVendor.description,
               price: basePrice + addOnPrice,
               addOns: addOns
             });
