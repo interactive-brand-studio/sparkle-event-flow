@@ -6,84 +6,61 @@ import { Input } from '@/components/ui/input';
 import VendorCard from '@/components/vendors/VendorCard';
 import FilterSidebar, { FilterOptions } from '@/components/vendors/FilterSidebar';
 import { usePackage } from '@/context/PackageContext';
-import { mockVendors } from '@/data/mockVendors';
-import { Vendor, VendorCategory } from '@/types/vendor';
-import { Grid2X2, List, Search } from 'lucide-react';
+import { useVendors } from '@/hooks/useVendors';
+import { useRealtime } from '@/hooks/useRealtime';
+import { Grid2X2, List, Search, Loader } from 'lucide-react';
 
 const Vendors = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { addVendor } = usePackage();
   
-  const [filteredVendors, setFilteredVendors] = useState<Vendor[]>(mockVendors);
   const [isGridView, setIsGridView] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState<'price_asc' | 'price_desc' | 'rating' | 'popularity'>('rating');
   
-  const initialCategory = searchParams.get('category') as VendorCategory | null;
+  const initialCategory = searchParams.get('category');
   
   const [filters, setFilters] = useState<FilterOptions>({
-    categories: initialCategory ? [initialCategory] : [],
+    categories: initialCategory ? [initialCategory as any] : [],
     minPrice: 0,
     maxPrice: 5000,
     minRating: 0,
     hasAddOns: false
   });
-  
-  useEffect(() => {
-    let results = [...mockVendors];
-    
-    // Apply search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      results = results.filter(vendor => 
-        vendor.name.toLowerCase().includes(query) || 
-        vendor.category.toLowerCase().includes(query) ||
-        vendor.location.toLowerCase().includes(query) ||
-        vendor.tagline.toLowerCase().includes(query)
-      );
-    }
-    
-    // Apply category filter
-    if (filters.categories.length > 0) {
-      results = results.filter(vendor => filters.categories.includes(vendor.category));
-    }
-    
-    // Apply price filter
-    results = results.filter(vendor => 
-      vendor.priceFrom >= filters.minPrice && vendor.priceFrom <= filters.maxPrice
-    );
-    
-    // Apply rating filter
-    results = results.filter(vendor => vendor.rating >= filters.minRating);
-    
-    // Apply add-ons filter
-    if (filters.hasAddOns) {
-      results = results.filter(vendor => vendor.addOns.length > 0);
-    }
-    
-    // Apply sorting
-    results = sortVendors(results, sortOption);
-    
-    setFilteredVendors(results);
-  }, [searchQuery, filters, sortOption]);
-  
-  const sortVendors = (vendors: Vendor[], option: string) => {
-    const sorted = [...vendors];
-    
-    switch (option) {
-      case 'price_asc':
-        return sorted.sort((a, b) => a.priceFrom - b.priceFrom);
-      case 'price_desc':
-        return sorted.sort((a, b) => b.priceFrom - a.priceFrom);
-      case 'rating':
-        return sorted.sort((a, b) => b.rating - a.rating);
-      case 'popularity':
-        return sorted.sort((a, b) => b.reviewCount - a.reviewCount);
-      default:
-        return sorted;
-    }
+
+  // Use real-time data synchronization
+  useRealtime();
+
+  // Build database filters
+  const dbFilters = {
+    categoryId: filters.categories.length > 0 ? 
+      categories.find(c => c.name === filters.categories[0])?.id : undefined,
+    searchQuery: searchQuery || undefined,
+    priceRange: filters.minPrice > 0 || filters.maxPrice < 5000 ? 
+      { min: filters.minPrice, max: filters.maxPrice } : undefined,
+    rating: filters.minRating > 0 ? filters.minRating : undefined,
+    status: 'approved' as const,
+    isActive: true,
   };
+
+  const { vendors, categories, isLoading, error } = useVendors(dbFilters);
+
+  // Sort vendors client-side for now (could be moved to database)
+  const sortedVendors = [...vendors].sort((a, b) => {
+    switch (sortOption) {
+      case 'price_asc':
+        return (a.price_range?.min || 0) - (b.price_range?.min || 0);
+      case 'price_desc':
+        return (b.price_range?.min || 0) - (a.price_range?.min || 0);
+      case 'rating':
+        return b.rating - a.rating;
+      case 'popularity':
+        return b.review_count - a.review_count;
+      default:
+        return 0;
+    }
+  });
   
   const handleFilterChange = (newFilters: FilterOptions) => {
     setFilters(newFilters);
@@ -100,10 +77,38 @@ const Vendors = () => {
     setSearchQuery('');
   };
   
-  const handleAddToPackage = (vendor: Vendor) => {
-    addVendor(vendor.category, vendor);
+  const handleAddToPackage = (vendor: any) => {
+    // Convert database vendor to legacy format for compatibility
+    const legacyVendor = {
+      id: vendor.id,
+      name: vendor.business_name,
+      image: vendor.portfolio_images?.[0] || '/placeholder.svg',
+      tagline: vendor.tagline || '',
+      category: vendor.categories?.name || 'Other',
+      priceFrom: vendor.price_range?.min || 0,
+      priceType: 'flat' as const,
+      rating: vendor.rating,
+      reviewCount: vendor.review_count,
+      verified: vendor.verification_status === 'approved',
+      location: vendor.service_areas?.[0] || '',
+      description: vendor.description || '',
+      services: [],
+      addOns: []
+    };
+    
+    addVendor(vendor.categories?.name || 'Other', legacyVendor);
     navigate('/package-builder');
   };
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h2 className="text-2xl font-semibold mb-4">Error Loading Vendors</h2>
+        <p className="text-gray-600 mb-6">There was an error loading the vendors. Please try again.</p>
+        <Button onClick={() => window.location.reload()}>Retry</Button>
+      </div>
+    );
+  }
   
   return (
     <div className="container mx-auto px-4 py-16 md:py-24">
@@ -138,10 +143,11 @@ const Vendors = () => {
         {/* Main content */}
         <div className="flex-1">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <div>
+            <div className="flex items-center gap-2">
               <p className="text-sm text-gray-500">
-                Showing {filteredVendors.length} vendors
+                Showing {sortedVendors.length} vendor{sortedVendors.length !== 1 ? 's' : ''}
               </p>
+              {isLoading && <Loader className="h-4 w-4 animate-spin" />}
             </div>
             
             <div className="flex items-center gap-4">
@@ -179,7 +185,12 @@ const Vendors = () => {
             </div>
           </div>
           
-          {filteredVendors.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Loading vendors...</span>
+            </div>
+          ) : sortedVendors.length === 0 ? (
             <div className="rounded-lg border bg-gray-50 p-8 text-center">
               <h3 className="text-xl font-medium mb-2">No vendors match your search</h3>
               <p className="text-gray-600 mb-6">Try adjusting your filters or search terms.</p>
@@ -187,10 +198,25 @@ const Vendors = () => {
             </div>
           ) : (
             <div className={isGridView ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-6"}>
-              {filteredVendors.map((vendor) => (
+              {sortedVendors.map((vendor) => (
                 <VendorCard
                   key={vendor.id}
-                  vendor={vendor}
+                  vendor={{
+                    id: vendor.id,
+                    name: vendor.business_name,
+                    image: vendor.portfolio_images?.[0] || '/placeholder.svg',
+                    tagline: vendor.tagline || '',
+                    category: vendor.categories?.name || 'Other',
+                    priceFrom: vendor.price_range?.min || 0,
+                    priceType: 'flat' as const,
+                    rating: vendor.rating,
+                    reviewCount: vendor.review_count,
+                    verified: vendor.verification_status === 'approved',
+                    location: vendor.service_areas?.[0] || '',
+                    description: vendor.description || '',
+                    services: [],
+                    addOns: []
+                  }}
                   onAddToPackage={() => handleAddToPackage(vendor)}
                 />
               ))}

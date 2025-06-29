@@ -1,366 +1,295 @@
 
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from '@/components/ui/sonner';
-import AdminLayout from '@/components/layout/AdminLayout';
-import AdminTable from '@/components/admin/AdminTable';
-import { Star, Package, Calendar, User, Tag, Check, X } from 'lucide-react';
-import { VendorCategory } from '@/types/vendor';
-
-// Mock data for vendors
-const mockVendors = [
-  { id: '1', name: 'Elegant Catering Co.', category: 'Catering', location: 'Los Angeles, CA', rating: 4.8, status: 'active' },
-  { id: '2', name: 'Dream Venue', category: 'Venue', location: 'New York, NY', rating: 4.6, status: 'active' },
-  { id: '3', name: 'Picture Perfect Photography', category: 'Photography', location: 'Chicago, IL', rating: 4.9, status: 'pending' },
-  { id: '4', name: 'Melody DJs', category: 'Music', location: 'Miami, FL', rating: 4.7, status: 'active' },
-  { id: '5', name: 'Floral Designs', category: 'Flowers', location: 'Seattle, WA', rating: 4.5, status: 'pending' }
-];
-
-// Mock data for bookings
-const mockBookings = [
-  { id: '1', client: 'Sarah & Michael', eventType: 'Wedding', date: new Date(2025, 5, 15), vendors: 3, status: 'confirmed' },
-  { id: '2', client: 'Innovate Corp', eventType: 'Corporate', date: new Date(2025, 4, 10), vendors: 2, status: 'pending' },
-  { id: '3', client: 'John Smith', eventType: 'Birthday', date: new Date(2025, 3, 22), vendors: 1, status: 'confirmed' },
-  { id: '4', client: 'Emma & David', eventType: 'Wedding', date: new Date(2024, 11, 5), vendors: 4, status: 'completed' }
-];
-
-// Mock data for reviews
-const mockReviews = [
-  { id: '1', vendor: 'Elegant Catering Co.', reviewer: 'Sarah J.', rating: 5, content: 'Amazing food and service!', status: 'approved' },
-  { id: '2', vendor: 'Dream Venue', reviewer: 'Michael T.', rating: 4, content: 'Beautiful venue but a bit pricey.', status: 'approved' },
-  { id: '3', vendor: 'Picture Perfect Photography', reviewer: 'Emma L.', rating: 5, content: 'The photos were incredible!', status: 'pending' },
-  { id: '4', vendor: 'Melody DJs', reviewer: 'John S.', rating: 3, content: 'Good music selection but arrived late.', status: 'pending' }
-];
-
-// Mock data for categories
-const mockCategories = [
-  { id: '1', name: 'Catering', count: 24 },
-  { id: '2', name: 'Venue', count: 18 },
-  { id: '3', name: 'Photography', count: 31 },
-  { id: '4', name: 'Videography', count: 15 },
-  { id: '5', name: 'Music', count: 27 },
-  { id: '6', name: 'Decor', count: 22 },
-  { id: '7', name: 'Flowers', count: 19 }
-];
-
-// Mock data for themes
-const mockThemes = [
-  { id: '1', name: 'Rustic', popularity: 'High' },
-  { id: '2', name: 'Modern Minimalist', popularity: 'Medium' },
-  { id: '3', name: 'Garden Party', popularity: 'High' },
-  { id: '4', name: 'Vintage Glam', popularity: 'Medium' },
-  { id: '5', name: 'Beach', popularity: 'High' },
-  { id: '6', name: 'Bohemian', popularity: 'Medium' }
-];
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/hooks/useAuth';
+import { useVendors } from '@/hooks/useVendors';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { 
+  Users, 
+  Store, 
+  Calendar, 
+  DollarSign, 
+  TrendingUp, 
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  XCircle
+} from 'lucide-react';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('vendors');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'category' | 'theme' | 'vendor'>('category');
-  
-  // Form states
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [newThemeName, setNewThemeName] = useState('');
-  const [newThemePopularity, setNewThemePopularity] = useState('Medium');
-  
-  const openAddDialog = (type: 'category' | 'theme' | 'vendor') => {
-    setDialogType(type);
-    setDialogOpen(true);
-  };
-  
-  const handleAddItem = () => {
-    // In a real app, this would save to the database
-    if (dialogType === 'category' && newCategoryName) {
-      toast.success(`Category "${newCategoryName}" added successfully`);
-      setNewCategoryName('');
-    } else if (dialogType === 'theme' && newThemeName) {
-      toast.success(`Theme "${newThemeName}" added successfully`);
-      setNewThemeName('');
-      setNewThemePopularity('Medium');
+  const { isAdmin, isInitialized } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect if not admin
+  useEffect(() => {
+    if (isInitialized && !isAdmin) {
+      navigate('/');
     }
-    
-    setDialogOpen(false);
-  };
-  
-  const handleApproveReview = (reviewId: string) => {
-    // In a real app, this would update the review status
-    toast.success('Review approved successfully');
-  };
-  
-  const handleRejectReview = (reviewId: string) => {
-    // In a real app, this would update the review status
-    toast.success('Review rejected');
-  };
-  
+  }, [isAdmin, isInitialized, navigate]);
+
+  // Get platform statistics
+  const { data: stats } = useQuery({
+    queryKey: ['admin-stats'],
+    queryFn: async () => {
+      const [
+        { count: totalUsers },
+        { count: totalVendors },
+        { count: pendingVendors },
+        { count: totalBookings },
+        { count: pendingReviews },
+        { data: recentBookings }
+      ] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('vendors').select('*', { count: 'exact', head: true }),
+        supabase.from('vendors').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+        supabase.from('bookings').select('*', { count: 'exact', head: true }),
+        supabase.from('reviews').select('*', { count: 'exact', head: true }).eq('is_moderated', false),
+        supabase.from('bookings')
+          .select('*, events(*), profiles(first_name, last_name)')
+          .order('created_at', { ascending: false })
+          .limit(5)
+      ]);
+
+      return {
+        totalUsers: totalUsers || 0,
+        totalVendors: totalVendors || 0,
+        pendingVendors: pendingVendors || 0,
+        totalBookings: totalBookings || 0,
+        pendingReviews: pendingReviews || 0,
+        recentBookings: recentBookings || []
+      };
+    },
+    enabled: isAdmin,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  const { vendors: pendingVendors } = useVendors({ 
+    status: 'pending',
+    isActive: true 
+  });
+
+  if (!isInitialized || !isAdmin) {
+    return null;
+  }
+
   return (
-    <AdminLayout>
-      <div className="space-y-8">
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+        <p className="text-gray-600">Manage your platform and monitor key metrics</p>
+      </div>
+
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle>Admin Dashboard</CardTitle>
-            <CardDescription>
-              Manage vendors, bookings, reviews, and system settings
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-4 flex items-center space-x-4">
-                  <div className="bg-blue-100 rounded-full p-3">
-                    <User className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Total Vendors</p>
-                    <p className="text-2xl font-bold">{mockVendors.length}</p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4 flex items-center space-x-4">
-                  <div className="bg-purple-100 rounded-full p-3">
-                    <Calendar className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Active Bookings</p>
-                    <p className="text-2xl font-bold">
-                      {mockBookings.filter(b => b.status === 'confirmed' || b.status === 'pending').length}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4 flex items-center space-x-4">
-                  <div className="bg-yellow-100 rounded-full p-3">
-                    <Star className="h-6 w-6 text-yellow-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Pending Reviews</p>
-                    <p className="text-2xl font-bold">
-                      {mockReviews.filter(r => r.status === 'pending').length}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4 flex items-center space-x-4">
-                  <div className="bg-green-100 rounded-full p-3">
-                    <Tag className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Categories</p>
-                    <p className="text-2xl font-bold">{mockCategories.length}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Registered customers and vendors
+            </p>
           </CardContent>
         </Card>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <div className="flex justify-between items-center mb-4">
-            <TabsList>
-              <TabsTrigger value="vendors">Vendors</TabsTrigger>
-              <TabsTrigger value="bookings">Bookings</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
-              <TabsTrigger value="categories">Categories</TabsTrigger>
-              <TabsTrigger value="themes">Themes</TabsTrigger>
-            </TabsList>
-            
-            <div className="flex items-center space-x-2">
-              <Input
-                placeholder={`Search ${activeTab}...`}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64"
-              />
-              
-              {(activeTab === 'categories' || activeTab === 'themes') && (
-                <Button onClick={() => openAddDialog(activeTab === 'categories' ? 'category' : 'theme')}>
-                  Add {activeTab === 'categories' ? 'Category' : 'Theme'}
-                </Button>
-              )}
-            </div>
-          </div>
-          
-          <TabsContent value="vendors" className="space-y-4">
-            <AdminTable
-              headers={['Name', 'Category', 'Location', 'Rating', 'Status', 'Actions']}
-              rows={mockVendors.map(vendor => [
-                vendor.name,
-                vendor.category,
-                vendor.location,
-                `${vendor.rating} ★`,
-                <Badge key={vendor.id} variant={vendor.status === 'active' ? 'default' : 'outline'}>
-                  {vendor.status}
-                </Badge>,
-                <div key={vendor.id} className="flex space-x-2">
-                  <Button variant="outline" size="sm">View</Button>
-                  <Button variant="outline" size="sm">Edit</Button>
-                </div>
-              ])}
-            />
-          </TabsContent>
-          
-          <TabsContent value="bookings" className="space-y-4">
-            <AdminTable
-              headers={['Client', 'Event Type', 'Date', 'Vendors', 'Status', 'Actions']}
-              rows={mockBookings.map(booking => [
-                booking.client,
-                booking.eventType,
-                booking.date.toLocaleDateString(),
-                booking.vendors,
-                <Badge key={booking.id} variant={
-                  booking.status === 'confirmed' ? 'default' :
-                  booking.status === 'pending' ? 'outline' : 'secondary'
-                }>
-                  {booking.status}
-                </Badge>,
-                <div key={booking.id} className="flex space-x-2">
-                  <Button variant="outline" size="sm">View</Button>
-                  <Button variant="outline" size="sm">Edit</Button>
-                </div>
-              ])}
-            />
-          </TabsContent>
-          
-          <TabsContent value="reviews" className="space-y-4">
-            <AdminTable
-              headers={['Vendor', 'Reviewer', 'Rating', 'Comment', 'Status', 'Actions']}
-              rows={mockReviews.map(review => [
-                review.vendor,
-                review.reviewer,
-                `${review.rating} ★`,
-                <div key={review.id} className="max-w-xs truncate">{review.content}</div>,
-                <Badge key={review.id} variant={review.status === 'approved' ? 'default' : 'outline'}>
-                  {review.status}
-                </Badge>,
-                <div key={review.id} className="flex space-x-2">
-                  {review.status === 'pending' ? (
-                    <>
-                      <Button size="sm" variant="outline" className="w-8 h-8 p-0" onClick={() => handleApproveReview(review.id)}>
-                        <Check className="h-4 w-4 text-green-500" />
-                      </Button>
-                      <Button size="sm" variant="outline" className="w-8 h-8 p-0" onClick={() => handleRejectReview(review.id)}>
-                        <X className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </>
-                  ) : (
-                    <Button variant="outline" size="sm">View</Button>
-                  )}
-                </div>
-              ])}
-            />
-          </TabsContent>
-          
-          <TabsContent value="categories" className="space-y-4">
-            <AdminTable
-              headers={['Category Name', 'Vendor Count', 'Actions']}
-              rows={mockCategories.map(category => [
-                category.name,
-                category.count,
-                <div key={category.id} className="flex space-x-2">
-                  <Button variant="outline" size="sm">Edit</Button>
-                  <Button variant="outline" size="sm">Delete</Button>
-                </div>
-              ])}
-            />
-          </TabsContent>
-          
-          <TabsContent value="themes" className="space-y-4">
-            <AdminTable
-              headers={['Theme Name', 'Popularity', 'Actions']}
-              rows={mockThemes.map(theme => [
-                theme.name,
-                <Badge key={theme.id} variant={
-                  theme.popularity === 'High' ? 'default' :
-                  theme.popularity === 'Medium' ? 'outline' : 'secondary'
-                }>
-                  {theme.popularity}
-                </Badge>,
-                <div key={theme.id} className="flex space-x-2">
-                  <Button variant="outline" size="sm">Edit</Button>
-                  <Button variant="outline" size="sm">Delete</Button>
-                </div>
-              ])}
-            />
-          </TabsContent>
-        </Tabs>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Vendors</CardTitle>
+            <Store className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.totalVendors || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats?.pendingVendors || 0} pending approval
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.totalBookings || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              All-time bookings
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.pendingReviews || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Require moderation
+            </p>
+          </CardContent>
+        </Card>
       </div>
-      
-      {/* Add Category/Theme Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {dialogType === 'category' ? 'Add New Category' : 'Add New Theme'}
-            </DialogTitle>
-            <DialogDescription>
-              {dialogType === 'category' 
-                ? 'Create a new vendor category for the platform' 
-                : 'Add a new event theme option for users'}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            handleAddItem();
-          }} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                {dialogType === 'category' ? 'Category Name' : 'Theme Name'}
-              </label>
-              <Input 
-                value={dialogType === 'category' ? newCategoryName : newThemeName}
-                onChange={(e) => {
-                  if (dialogType === 'category') {
-                    setNewCategoryName(e.target.value);
-                  } else {
-                    setNewThemeName(e.target.value);
-                  }
-                }}
-                placeholder={dialogType === 'category' ? 'e.g. Photography' : 'e.g. Vintage'}
-                required
-              />
-            </div>
-            
-            {dialogType === 'theme' && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Popularity</label>
-                <Select value={newThemePopularity} onValueChange={setNewThemePopularity}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="High">High</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="Low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
+
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="vendors">Vendor Management</TabsTrigger>
+          <TabsTrigger value="bookings">Bookings</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Recent Bookings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Bookings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {stats?.recentBookings?.map((booking: any) => (
+                    <div key={booking.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">
+                          {booking.profiles?.first_name} {booking.profiles?.last_name}
+                        </p>
+                        <p className="text-sm text-gray-600">{booking.events?.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(booking.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant={
+                          booking.status === 'confirmed' ? 'default' :
+                          booking.status === 'pending' ? 'secondary' :
+                          booking.status === 'completed' ? 'default' : 'destructive'
+                        }>
+                          {booking.status}
+                        </Badge>
+                        <p className="text-sm font-medium mt-1">
+                          ${booking.total_amount}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button className="w-full justify-start" variant="outline">
+                  <Users className="mr-2 h-4 w-4" />
+                  Manage Users
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <Store className="mr-2 h-4 w-4" />
+                  Review Vendor Applications ({stats?.pendingVendors || 0})
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <AlertCircle className="mr-2 h-4 w-4" />
+                  Moderate Reviews ({stats?.pendingReviews || 0})
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  View Analytics
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="vendors" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Pending Vendor Applications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {pendingVendors.map((vendor) => (
+                  <div key={vendor.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                        <Store className="h-6 w-6 text-gray-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{vendor.business_name}</h3>
+                        <p className="text-sm text-gray-600">{vendor.categories?.name}</p>
+                        <p className="text-xs text-gray-500">
+                          Applied {new Date(vendor.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button size="sm" variant="outline">
+                        <CheckCircle className="mr-1 h-4 w-4" />
+                        Approve
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <XCircle className="mr-1 h-4 w-4" />
+                        Reject
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {pendingVendors.length === 0 && (
+                  <p className="text-center text-gray-500 py-8">
+                    No pending vendor applications
+                  </p>
+                )}
               </div>
-            )}
-            
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">
-                Add {dialogType === 'category' ? 'Category' : 'Theme'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </AdminLayout>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="bookings">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Bookings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">Booking management interface will be implemented here.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reviews">
+          <Card>
+            <CardHeader>
+              <CardTitle>Review Moderation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">Review moderation interface will be implemented here.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <Card>
+            <CardHeader>
+              <CardTitle>Platform Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">Platform configuration settings will be implemented here.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
