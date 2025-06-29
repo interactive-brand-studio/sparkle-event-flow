@@ -31,7 +31,9 @@ const SavedPackages = ({ savedPackages }: SavedPackagesProps) => {
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <CardTitle>{pkg.name}</CardTitle>
-                  <Badge variant="outline">{pkg.vendorCount} vendors</Badge>
+                  <Badge variant="outline">
+                    {pkg.vendorCount} vendors
+                  </Badge>
                 </div>
                 <CardDescription>
                   Saved on {pkg.createdAt.toLocaleDateString()}

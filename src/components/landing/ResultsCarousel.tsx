@@ -91,7 +91,9 @@ const ResultsCarousel = () => {
               <CardHeader>
                 <div className="flex justify-between items-start mb-2">
                   <CardTitle className="text-2xl">{activePackage.title}</CardTitle>
-                  <Badge variant="outline">{activePackage.vendorCount} vendors</Badge>
+                  <Badge variant="outline">
+                    {activePackage.vendorCount} vendors
+                  </Badge>
                 </div>
                 <p className="text-gray-600">{activePackage.description}</p>
               </CardHeader>

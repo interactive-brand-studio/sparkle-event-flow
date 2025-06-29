@@ -32,7 +32,9 @@ const BookingSummary = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-medium">{vendor.name}</h4>
-                    <Badge variant="outline" className="mt-1">{vendor.category}</Badge>
+                    <Badge variant="outline" className="mt-1">
+                      {vendor.category}
+                    </Badge>
                   </div>
                   <span className="font-medium">{formatCurrency(vendor.priceFrom)}</span>
                 </div>
